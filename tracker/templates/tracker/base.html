@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PriceTag</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#8B5CF6', // Violet
+                        secondary: '#10B981', // Emerald
+                        dark: '#0B0F19', // Deep Dark
+                        surface: '#151B2B', // Card Surface
+                        accent: '#F472B6', // Pink
+                    },
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Light Mode Background */
+        body {
+            background-color: #F3F4F6;
+            background-image:
+                radial-gradient(circle at 0% 0%, rgba(139, 92, 246, 0.4) 0%, transparent 50%),
+                radial-gradient(circle at 100% 0%, rgba(16, 185, 129, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(244, 114, 182, 0.4) 0%, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        /* Dark Mode Background */
+        .dark body {
+            background-color: #0B0F19;
+            background-image:
+                radial-gradient(circle at 50% -20%, rgba(124, 58, 237, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 100% 50%, rgba(56, 189, 248, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 0% 50%, rgba(236, 72, 153, 0.2) 0%, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .dark .glass {
+            background: rgba(21, 27, 43, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #d1d5db;
+        }
+
+        .dark .glass-panel {
+            background: #151B2B;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #A78BFA 0%, #F472B6 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-pill {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid #e5e7eb;
+        }
+
+        .dark .nav-pill {
+            background: rgba(21, 27, 43, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 4px;
+        }
+
+        .dark ::-webkit-scrollbar-thumb {
+            background: #334155;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94A3B8;
+        }
+
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+    </style>
+</head>
+
+<body class="text-gray-900 dark:text-gray-100 antialiased">
+
+    <!-- Floating Navbar -->
+    {% block navbar %}
+    <div class="fixed top-0 left-0 right-0 z-50 px-4 py-4">
+        <nav
+            class="container mx-auto max-w-7xl nav-pill rounded-2xl shadow-lg px-6 py-3 flex justify-between items-center transition-all duration-300">
+            <a href="{% url 'dashboard' %}" class="text-2xl font-bold flex items-center gap-2 group">
+                <div
+                    class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white text-sm shadow-lg group-hover:scale-110 transition-transform">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <span
+                    class="bg-clip-text text-transparent bg-gradient-to-r from-gray-800 to-gray-600 dark:from-white dark:to-gray-300">PriceTag</span>
+            </a>
+
+            <!-- Search Bar -->
+            <div class="hidden md:flex items-center flex-1 max-w-md mx-8">
+                <form action="{% url 'search_tracked_products' %}" method="GET" class="relative w-full group">
+                    <i
+                        class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors"></i>
+                    <input type="text" name="q" id="search-input" placeholder="Search tracked products..."
+                        value="{{ search_query|default:'' }}" autocomplete="off"
+                        class="w-full bg-gray-100 dark:bg-dark/50 border border-transparent focus:border-primary/50 text-sm rounded-xl py-2 pl-10 pr-4 outline-none transition-all dark:text-white placeholder-gray-500">
+
+                    <!-- Live Search Results -->
+                    <div id="search-results"
+                        class="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-surface border border-gray-100 dark:border-white/10 rounded-xl shadow-xl overflow-hidden hidden z-50">
+                        <!-- Results injected here -->
+                    </div>
+                </form>
+            </div>
+
+            <script>
+                const searchInput = document.getElementById('search-input');
+                const searchResults = document.getElementById('search-results');
+                let debounceTimer;
+
+                searchInput.addEventListener('input', function () {
+                    clearTimeout(debounceTimer);
+                    const query = this.value.trim();
+
+                    if (query.length < 2) {
+                        searchResults.classList.add('hidden');
+                        return;
+                    }
+
+                    debounceTimer = setTimeout(() => {
+                        fetch(`{% url 'api_search_products' %}?q=${encodeURIComponent(query)}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                searchResults.innerHTML = '';
+                                if (data.results && data.results.length > 0) {
+                                    data.results.forEach(product => {
+                                        const item = document.createElement('a');
+                                        item.href = product.url;
+                                        item.className = 'flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors border-b border-gray-50 dark:border-white/5 last:border-0';
+
+                                        const img = product.image_url ? `<img src="${product.image_url}" class="w-8 h-8 object-contain mix-blend-multiply dark:mix-blend-normal">` : `<div class="w-8 h-8 flex items-center justify-center bg-gray-100 dark:bg-white/10 rounded"><i class="fas fa-image text-gray-400 text-xs"></i></div>`;
+
+                                        item.innerHTML = `
+                                            <div class="w-10 h-10 rounded-lg bg-white dark:bg-white/5 p-1 flex items-center justify-center shrink-0">
+                                                ${img}
+                                            </div>
+                                            <div class="min-w-0 flex-1">
+                                                <div class="text-sm font-medium text-gray-900 dark:text-white truncate">${product.name}</div>
+                                                <div class="text-xs text-gray-500 dark:text-gray-400">${product.currency}${product.current_price || 'N/A'}</div>
+                                            </div>
+                                        `;
+                                        searchResults.appendChild(item);
+                                    });
+                                    searchResults.classList.remove('hidden');
+                                } else {
+                                    searchResults.innerHTML = `
+                                        <div class="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                                            No products found
+                                        </div>
+                                    `;
+                                    searchResults.classList.remove('hidden');
+                                }
+                            });
+                    }, 300);
+                });
+
+                // Close on click outside
+                document.addEventListener('click', function (e) {
+                    if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                        searchResults.classList.add('hidden');
+                    }
+                });
+            </script>
+
+            <div class="flex items-center gap-4">
+                {% if user.is_authenticated %}
+                <div class="flex items-center gap-3">
+                    <a href="{% url 'profile' %}" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                        <div class="text-right hidden sm:block">
+                            <div class="text-sm font-medium">{{ user.get_full_name|default:user.username }}</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400"></div>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-purple-600 p-[2px]">
+                            <div
+                                class="w-full h-full rounded-full bg-white dark:bg-dark flex items-center justify-center overflow-hidden">
+                                <img src="https://ui-avatars.com/api/?name={{ user.get_full_name|default:user.username }}&background=random"
+                                    alt="User" class="w-full h-full object-cover">
+                            </div>
+                        </div>
+                    </a>
+                    <form method="post" action="{% url 'logout' %}" class="inline ml-2">
+                        {% csrf_token %}
+                        <button type="submit" class="text-gray-400 hover:text-red-500 transition-colors" title="Logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </form>
+                </div>
+                {% else %}
+                <a href="{% url 'login' %}" class="text-sm font-medium hover:text-primary transition-colors">Login</a>
+                {% endif %}
+
+                <button id="theme-toggle"
+                    class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-dark/50 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-dark/80 transition-all">
+                    <i class="fas fa-moon dark:hidden"></i>
+                    <i class="fas fa-sun hidden dark:block text-yellow-400"></i>
+                </button>
+            </div>
+        </nav>
+    </div>
+    {% endblock %}
+
+    <main class="container mx-auto px-4 {% block main_padding %}pt-28{% endblock %} pb-12 max-w-7xl">
+        {% if messages %}
+        <div class="mb-8 grid gap-2">
+            {% for message in messages %}
+            <div
+                class="p-4 rounded-xl flex items-center gap-3 shadow-sm {% if message.tags == 'error' %}bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 border border-red-100 dark:border-red-900/30{% else %}bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400 border border-green-100 dark:border-green-900/30{% endif %}">
+                <i
+                    class="fas {% if message.tags == 'error' %}fa-exclamation-circle{% else %}fa-check-circle{% endif %}"></i>
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+
+        // Check local storage
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            html.classList.add('dark');
+        } else {
+            html.classList.remove('dark');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            if (html.classList.contains('dark')) {
+                localStorage.theme = 'dark';
+            } else {
+                localStorage.theme = 'light';
+            }
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>

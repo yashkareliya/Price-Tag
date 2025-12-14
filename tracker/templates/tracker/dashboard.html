@@ -1,0 +1,265 @@
+{% extends 'tracker/base.html' %}
+
+{% block content %}
+<!-- Dashboard Header -->
+<div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+    <div>
+        <h1 class="text-3xl font-bold mb-1 dark:text-white">Dashboard</h1>
+        <p class="text-gray-500 dark:text-gray-400 text-sm">Welcome back, {{ user.get_full_name|default:user.username }}
+        </p>
+    </div>
+    <div class="flex gap-3">
+        <a href="{% url 'update_prices' %}"
+            class="glass-panel hover:bg-white/50 dark:hover:bg-white/5 text-gray-700 dark:text-gray-300 px-5 py-2.5 rounded-xl font-medium transition-all flex items-center gap-2 text-sm shadow-sm">
+            <i class="fas fa-sync-alt text-primary"></i> Update Prices
+        </a>
+        <button onclick="document.getElementById('add-modal').classList.remove('hidden')"
+            class="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white px-5 py-2.5 rounded-xl font-medium transition-all flex items-center gap-2 text-sm shadow-lg shadow-primary/25">
+            <i class="fas fa-plus"></i> Add Product
+        </button>
+    </div>
+</div>
+
+<!-- Main Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+    <!-- Left Column: Watchlist (4 cols) -->
+    <div class="lg:col-span-4 space-y-6">
+        <div class="glass-panel rounded-3xl p-5 h-full">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="font-semibold text-lg dark:text-white">My Watchlist</h2>
+                <div class="flex gap-3">
+                    <a href="{% url 'deal_list' %}"
+                        class="text-sm text-green-500 hover:text-green-600 transition-colors font-medium">
+                        Deals
+                    </a>
+                    <a href="{% url 'product_list' %}"
+                        class="text-sm text-primary hover:text-accent transition-colors font-medium">
+                        View All
+                    </a>
+                </div>
+            </div>
+
+            <div class="space-y-5 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                {% for product in products|slice:":5" %}
+                <a href="{% url 'product_detail' product.id %}" class="block group">
+                    <div
+                        class="p-3 rounded-2xl bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors flex items-center gap-3 border border-gray-200 dark:border-transparent hover:border-primary/20">
+                        <div
+                            class="w-12 h-12 rounded-xl bg-white dark:bg-dark p-2 flex items-center justify-center shrink-0 shadow-sm">
+                            {% if product.image_url %}
+                            <img src="{{ product.image_url }}" alt="{{ product.name }}"
+                                class="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal">
+                            {% else %}
+                            <i class="fas fa-image text-gray-300"></i>
+                            {% endif %}
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <h3
+                                class="text-sm font-medium truncate dark:text-gray-200 group-hover:text-primary transition-colors">
+                                {{ product.name }}</h3>
+                            <div class="flex justify-between items-center mt-1">
+                                <span class="text-xs text-gray-500 dark:text-gray-400">
+                                    {{ product.currency }}{{ product.current_price|default:"N/A" }}
+                                </span>
+                                {% if product.is_below_threshold %}
+                                <span
+                                    class="text-[10px] bg-green-500/10 text-green-500 px-1.5 py-0.5 rounded font-medium">DEAL</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                {% empty %}
+                <div class="text-center py-8 text-gray-400">
+                    <i class="fas fa-box-open text-2xl mb-2"></i>
+                    <p class="text-sm">No items yet</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Center Column: Featured/Main (8 cols) -->
+    <div class="lg:col-span-8 space-y-6">
+        {% if products %}
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Total Products -->
+            <div class="glass-panel p-4 rounded-2xl flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center text-xl">
+                    <i class="fas fa-box"></i>
+                </div>
+                <div>
+                    <div class="text-2xl font-bold dark:text-white">{{ total_items }}</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400 font-medium">Total Tracked</div>
+                </div>
+            </div>
+
+            <!-- Active Deals -->
+            <div class="glass-panel p-4 rounded-2xl flex items-center gap-4">
+                <div
+                    class="w-12 h-12 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center text-xl">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <div>
+                    <div class="text-2xl font-bold dark:text-white">{{ deals_found }}</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400 font-medium">Active Deals</div>
+                </div>
+            </div>
+
+            <!-- Total Savings -->
+            <div class="glass-panel p-4 rounded-2xl flex items-center gap-4">
+                <div
+                    class="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center text-xl">
+                    <i class="fas fa-wallet"></i>
+                </div>
+                <div>
+                    <div class="text-2xl font-bold dark:text-white">₹{{ total_savings|floatformat:0 }}</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400 font-medium">Potential Savings</div>
+                </div>
+            </div>
+        </div>
+
+        {% with featured=products.0 %}
+        <div class="glass-panel rounded-3xl p-6 relative overflow-hidden group">
+            <!-- Background Glow -->
+            <div
+                class="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none">
+            </div>
+
+            <div class="flex flex-col md:flex-row gap-6 relative z-10">
+                <!-- Image Section -->
+                <div class="w-full md:w-1/2">
+                    <div
+                        class="aspect-square md:aspect-auto md:h-full bg-gradient-to-br from-gray-50 to-gray-100 dark:from-white/5 dark:to-white/5 rounded-2xl flex items-center justify-center p-6 relative group-hover:scale-[1.02] transition-transform duration-500 border border-gray-200 dark:border-transparent">
+                        {% if featured.image_url %}
+                        <img src="{{ featured.image_url }}" alt="{{ featured.name }}"
+                            class="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal drop-shadow-xl">
+                        {% else %}
+                        <i class="fas fa-image text-6xl text-gray-300"></i>
+                        {% endif %}
+
+                        {% if featured.is_below_threshold %}
+                        <div
+                            class="absolute bottom-4 right-4 bg-green-500 text-white px-3 py-1.5 rounded-lg text-sm font-bold shadow-lg shadow-green-500/30 flex items-center gap-1">
+                            <i class="fas fa-arrow-down"></i> Deal
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Details Section -->
+                <div class="w-full md:w-1/2 flex flex-col">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span
+                                class="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold mb-2 border border-primary/20">
+                                <i class="fas fa-star mr-1"></i> Featured
+                            </span>
+                            <h2 class="text-2xl font-bold dark:text-white leading-tight mb-1 line-clamp-2">
+                                {{ featured.name }}
+                            </h2>
+                            <p class="text-gray-500 dark:text-gray-400 text-sm">
+                                Tracked since {{ featured.created_at|date:"M d, Y" }}
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <div class="flex-1"></div>
+
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div
+                            class="p-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-transparent hover:border-primary/10 transition-colors">
+                            <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">Current Price</div>
+                            <div class="text-2xl font-bold dark:text-white">
+                                {{ featured.currency }}{{ featured.current_price|default:"N/A" }}
+                            </div>
+                        </div>
+                        <div
+                            class="p-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-transparent hover:border-primary/10 transition-colors">
+                            <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">Target Price</div>
+                            <div class="text-2xl font-bold text-gray-400">
+                                {{ featured.currency }}{{ featured.target_price }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3">
+                        <a href="{% url 'product_detail' featured.id %}"
+                            class="flex-1 bg-gray-900 dark:bg-white text-white dark:text-dark py-3 rounded-xl font-semibold text-center hover:opacity-90 transition-opacity shadow-lg">
+                            View Details
+                        </a>
+                        <a href="{{ featured.url }}" target="_blank"
+                            class="px-4 py-3 rounded-xl bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-white font-medium hover:bg-gray-200 dark:hover:bg-white/20 transition-colors">
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endwith %}
+
+        {% else %}
+        <div class="glass-panel rounded-3xl p-12 text-center">
+            <div
+                class="w-20 h-20 bg-gray-100 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-search text-3xl text-gray-400"></i>
+            </div>
+            <h2 class="text-2xl font-bold dark:text-white mb-2">Start Tracking</h2>
+            <p class="text-gray-500 dark:text-gray-400 mb-8 max-w-md mx-auto">Add a product URL to start tracking prices
+                and get notified when they drop.</p>
+            <button onclick="document.getElementById('add-modal').classList.remove('hidden')"
+                class="bg-primary text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-all">
+                Add First Product
+            </button>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+</div>
+
+<!-- Add Product Modal -->
+<div id="add-modal"
+    class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-md transition-all duration-300 p-4">
+    <div class="glass-panel rounded-3xl shadow-2xl w-full max-w-md transform transition-all scale-100 overflow-hidden">
+        <div
+            class="p-6 border-b border-gray-100 dark:border-white/5 flex justify-between items-center bg-gray-50/50 dark:bg-white/5">
+            <h2 class="text-xl font-bold dark:text-white">Track New Product</h2>
+            <button onclick="document.getElementById('add-modal').classList.add('hidden')"
+                class="w-8 h-8 rounded-full bg-gray-100 dark:bg-white/10 flex items-center justify-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form action="{% url 'add_product' %}" method="POST" class="p-6 space-y-5">
+            {% csrf_token %}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Product URL</label>
+                <div class="relative">
+                    <i class="fas fa-link absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <input type="url" name="url" required
+                        class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-dark focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all dark:text-white placeholder-gray-400"
+                        placeholder="https://example.com/product...">
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Target Price</label>
+                <div class="relative">
+                    <i class="fas fa-tag absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <input type="number" name="target_price" step="0.01" required
+                        class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-dark focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all dark:text-white placeholder-gray-400"
+                        placeholder="0.00">
+                </div>
+            </div>
+            <div class="pt-2">
+                <button type="submit"
+                    class="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white py-3.5 rounded-xl font-bold transition-all shadow-lg shadow-primary/30 transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                    <i class="fas fa-radar"></i> Start Tracking
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

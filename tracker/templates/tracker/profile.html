@@ -1,0 +1,99 @@
+{% extends 'tracker/base.html' %}
+<!-- Profile Page Fixed -->
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-8">
+    <!-- Back Link -->
+    <div>
+        <a href="{% url 'dashboard' %}"
+            class="inline-flex items-center gap-2 text-gray-500 hover:text-primary transition-colors">
+            <i class="fas fa-arrow-left"></i>
+            <span>Back to Dashboard</span>
+        </a>
+    </div>
+
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">My Profile</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">Manage your account and view your stats</p>
+        </div>
+    </div>
+
+    <!-- Profile Card -->
+    <div class="glass-panel rounded-2xl p-8 shadow-sm">
+        <div class="flex flex-col md:flex-row items-center gap-8">
+            <!-- Avatar -->
+            <div class="relative group">
+                <div class="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-accent p-1 shadow-xl">
+                    <div class="w-full h-full rounded-full bg-white dark:bg-dark overflow-hidden">
+                        <img src="https://ui-avatars.com/api/?name={{ user.get_full_name|default:user.username|urlencode }}&background=random&size=256"
+                            alt="Profile" class="w-full h-full object-cover">
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Info -->
+            <div class="flex-1 text-center md:text-left space-y-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white">{{ user.get_full_name|default:user.username }}</h2>
+                    <p class="text-gray-500 dark:text-gray-400">{{ user.email }}</p>
+                </div>
+
+                <div class="flex flex-wrap justify-center md:justify-start gap-4">
+                    <div
+                        class="px-4 py-2 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10">
+                        <span class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Member
+                            Since</span>
+                        <p class="font-medium text-gray-900 dark:text-white">{{ user.date_joined|date:"F Y" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Total Tracked -->
+        <div class="glass-panel rounded-2xl p-6 relative overflow-hidden group">
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                <i class="fas fa-box text-6xl text-primary"></i>
+            </div>
+            <div class="relative z-10">
+                <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-4">
+                    <i class="fas fa-box text-xl"></i>
+                </div>
+                <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-1">{{ total_products }}</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Total Tracked Products</p>
+            </div>
+        </div>
+
+        <!-- Active Deals -->
+        <div class="glass-panel rounded-2xl p-6 relative overflow-hidden group">
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                <i class="fas fa-bolt text-6xl text-secondary"></i>
+            </div>
+            <div class="relative z-10">
+                <div class="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary mb-4">
+                    <i class="fas fa-bolt text-xl"></i>
+                </div>
+                <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-1">{{ active_deals }}</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Active Deals Found</p>
+            </div>
+        </div>
+
+        <!-- Total Savings -->
+        <div class="glass-panel rounded-2xl p-6 relative overflow-hidden group">
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                <i class="fas fa-wallet text-6xl text-accent"></i>
+            </div>
+            <div class="relative z-10">
+                <div class="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent mb-4">
+                    <i class="fas fa-wallet text-xl"></i>
+                </div>
+                <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-1">₹{{ potential_savings }}</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Potential Savings</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

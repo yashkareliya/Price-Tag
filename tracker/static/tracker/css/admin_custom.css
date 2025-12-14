@@ -1,0 +1,155 @@
+/* Dark Theme for Django Admin */
+:root {
+    --primary: #9333ea; /* Purple-600 */
+    --secondary: #10b981; /* Emerald-500 */
+    --accent: #ec4899; /* Pink-500 */
+    --bg-dark: #111827; /* Gray-900 */
+    --bg-card: #1f2937; /* Gray-800 */
+    --text-main: #f3f4f6; /* Gray-100 */
+    --text-muted: #9ca3af; /* Gray-400 */
+    --border: #374151; /* Gray-700 */
+}
+
+body {
+    background-color: var(--bg-dark) !important;
+    color: var(--text-main) !important;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+}
+
+/* Header */
+#header {
+    background: linear-gradient(to right, #111827, #4c1d95) !important; /* Dark to Purple */
+    color: var(--text-main) !important;
+    border-bottom: 1px solid var(--border);
+}
+
+#branding h1 {
+    color: var(--text-main) !important;
+    font-weight: 700;
+}
+
+#branding h1 a:link, #branding h1 a:visited {
+    color: var(--text-main) !important;
+}
+
+/* Modules / Dashboard */
+.module {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.module caption, .module h2 {
+    background-color: #374151 !important; /* Gray-700 */
+    color: var(--text-main) !important;
+}
+
+/* Links */
+a:link, a:visited {
+    color: var(--secondary) !important;
+}
+
+a:hover {
+    color: var(--accent) !important;
+}
+
+/* Tables */
+#changelist table {
+    background-color: var(--bg-card) !important;
+    color: var(--text-main) !important;
+}
+
+#changelist table thead th {
+    background-color: #374151 !important;
+    color: var(--text-main) !important;
+}
+
+#changelist table tbody tr {
+    background-color: var(--bg-card) !important;
+}
+
+#changelist table tbody tr.row1 {
+    background-color: var(--bg-card) !important;
+}
+
+#changelist table tbody tr.row2 {
+    background-color: #1f2937 !important; /* Slightly lighter/darker for striping */
+}
+
+#changelist table tbody tr:hover {
+    background-color: #374151 !important;
+}
+
+/* Forms */
+.form-row {
+    border-bottom: 1px solid var(--border) !important;
+}
+
+label {
+    color: var(--text-main) !important;
+}
+
+input[type=text], input[type=password], input[type=email], input[type=url], input[type=number], textarea, select, .vTextField {
+    background-color: #374151 !important;
+    color: var(--text-main) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 0.375rem;
+    padding: 0.5rem;
+}
+
+/* Buttons */
+.button, input[type=submit], input[type=button], .submit-row input, a.button {
+    background: var(--primary) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 0.375rem;
+    padding: 0.5rem 1rem;
+    transition: background 0.2s;
+}
+
+.button:hover, input[type=submit]:hover, input[type=button]:hover {
+    background: #7e22ce !important; /* Purple-700 */
+}
+
+.button.default, input[type=submit].default, .submit-row input.default {
+    background: var(--secondary) !important;
+}
+
+.button.default:hover, input[type=submit].default:hover {
+    background: #059669 !important; /* Emerald-600 */
+}
+
+/* Breadcrumbs */
+div.breadcrumbs {
+    background-color: var(--bg-card) !important;
+    color: var(--text-muted) !important;
+    border-bottom: 1px solid var(--border);
+}
+
+div.breadcrumbs a {
+    color: var(--text-main) !important;
+}
+
+/* Sidebar / Filter */
+#changelist-filter {
+    background-color: var(--bg-card) !important;
+    border-left: 1px solid var(--border) !important;
+}
+
+#changelist-filter h2 {
+    background-color: #374151 !important;
+    color: var(--text-main) !important;
+}
+
+#changelist-filter a {
+    color: var(--text-muted) !important;
+}
+
+#changelist-filter a:hover {
+    color: var(--primary) !important;
+}
+
+#changelist-filter li.selected a {
+    color: var(--secondary) !important;
+}
